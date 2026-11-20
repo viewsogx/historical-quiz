@@ -6,14 +6,26 @@ on:
   pull_request:
     branches: ["main"]
 
+  workflow_dispatch:
+    
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
+      - uses: action/checkout/v4
+      - name: Docker login
+        uses: docker/login-action@4.8.0
+        with:
+          registry: ghcr.io
+          username: viewsogx
+          password: ${{secrets.GHCR_TOKEN}}
+
+
       - uses: actions/checkout@v4
       - name: Build the Docker images
         run: |
-
-          docker build ./backend -t quiz-backend:$(date +%s)
-          docker build ./frontend -t quiz-frontend:$(date +%s)
+          VERSION=$(date +%s)
+          docker build ./backend -t ghcr.io/viewsogx/quiz-backend:$VERSION
+          docker build ./frontend -t ghcr.io/viewsogx/quiz-frontend:$VERSION
+          docker push ghcr.io/viewsogx/quiz-backend:$VERSION
+          docker push ghcr.io/viewsogx/quiz-frontend:$VERSION
